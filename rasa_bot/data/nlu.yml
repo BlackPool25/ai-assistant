@@ -1,0 +1,20 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - Hi
+    - Hello
+    - Good morning
+
+- intent: assistance
+  examples: |
+    - Can you help me?
+    - I need assistance
+    - What can you do?
+
+- intent: reminder
+  examples: |
+    - Remind me to take medicine
+    - Set a reminder for 3 PM
+    - Create a medication alert

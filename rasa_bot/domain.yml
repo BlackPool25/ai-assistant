@@ -1,0 +1,21 @@
+version: "3.1"
+
+intents:
+  - greet
+  - assistance
+  - reminder
+
+responses:
+  utter_greet:
+    - text: "Hello! How can I assist you today?"
+  utter_assistance:
+    - text: "I can help with reminders, answer questions, and provide companionship. What do you need?"
+  utter_reminder_acknowledge:
+    - text: "I've set a reminder for you. I'll alert you when it's time."
+
+actions:
+  - validate_reminder
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

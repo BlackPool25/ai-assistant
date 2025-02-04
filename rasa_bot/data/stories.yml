@@ -1,0 +1,17 @@
+version: "3.1"
+
+stories:
+- story: greeting path
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- story: assistance path
+  steps:
+  - intent: assistance
+  - action: utter_assistance
+
+- story: reminder path
+  steps:
+  - intent: reminder
+  - action: utter_reminder_acknowledge

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Senior Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Assistant</h1>
+        <div class="chat-box" id="chat-box"></div>
+        
+        <div class="controls">
+            <button id="record-btn" class="large-btn">🎤 Press to Speak</button>
+            <div class="or">OR</div>
+            <input type="text" id="text-input" placeholder="Type your message...">
+            <button id="send-btn" class="large-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const recordBtn = document.getElementById('record-btn');
+        let mediaRecorder;
+        let audioChunks = [];
+
+        recordBtn.addEventListener('mousedown', startRecording);
+        recordBtn.addEventListener('mouseup', stopRecording);
+
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+            mediaRecorder.start();
+        }
+
+        async function stopRecording() {
+            mediaRecorder.stop();
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks);
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.wav');
+                
+                const response = await fetch('/transcribe', { method: 'POST', body: formData });
+                const data = await response.json();
+                handleUserInput(data.text);
+                
+                audioChunks = [];
+            };
+        }
+
+        async function handleUserInput(text) {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<div class="user-message">You: ${text}</div>`;
+            
+            const response = await fetch('http://localhost:5005/webhooks/rest/webhook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sender: 'user', message: text })
+            });
+            
+            const botResponse = await response.json();
+            const botText = botResponse[0].text;
+            chatBox.innerHTML += `<div class="bot-message">Assistant: ${botText}</div>`;
+            
+            // Convert response to speech
+            const ttsResponse = await fetch('/synthesize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: botText })
+            });
+            
+            const audioData = await ttsResponse.json();
+            const audio = new Audio(audioData.audioUrl);
+            audio.play();
+        }
+    </script>
+</body>
+</html>
