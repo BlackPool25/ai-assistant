@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="history-container">
+    <h2 class="history-title">Interaction History</h2>
+    <div class="history-list">
+        {% for interaction in interactions %}
+        <div class="history-item">
+            <div class="history-message">
+                <strong>You:</strong> {{ interaction.input_text }}
+            </div>
+            <div class="history-message">
+                <strong>Assistant:</strong> {{ interaction.response_text }}
+            </div>
+            <div class="history-time">
+                {{ interaction.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

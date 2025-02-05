@@ -1,0 +1,76 @@
+/* Add these to existing styles */
+.auth-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.auth-title {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-size: 32px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: var(--font-size-medium);
+    color: var(--text-color);
+}
+
+.wide-button {
+    width: 100%;
+    padding: 20px;
+    font-size: var(--font-size-medium);
+}
+
+.auth-alternate {
+    text-align: center;
+    margin-top: 20px;
+    font-size: var(--font-size-medium);
+}
+
+/* Error/Success Messages */
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-size: var(--font-size-medium);
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .senior-input {
+        font-size: var(--font-size-medium);
+    }
+    
+    .auth-container {
+        padding: 20px;
+        margin: 20px;
+    }
+}

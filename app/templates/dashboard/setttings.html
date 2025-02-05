@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="settings-container">
+    <h2 class="settings-title">Settings</h2>
+    <form class="settings-form" method="POST">
+        <div class="form-group">
+            <label for="voice">Preferred Voice:</label>
+            <select id="voice" name="voice" class="senior-input">
+                <option value="male" {% if current_user.preferred_voice == 'male' %}selected{% endif %}>Male</option>
+                <option value="female" {% if current_user.preferred_voice == 'female' %}selected{% endif %}>Female</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="text_size">Text Size:</label>
+            <select id="text_size" name="text_size" class="senior-input">
+                <option value="large" {% if current_user.text_size == 'large' %}selected{% endif %}>Large</option>
+                <option value="medium" {% if current_user.text_size == 'medium' %}selected{% endif %}>Medium</option>
+            </select>
+        </div>
+        <button type="submit" class="senior-button">Save Settings</button>
+    </form>
+</div>
+{% endblock %}

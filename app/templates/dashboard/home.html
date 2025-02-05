@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="assistant-container">
+    <div class="mode-toggle">
+        <button id="mode-btn" class="toggle-btn voice-mode">
+            <i class="fas fa-microphone"></i> Voice Mode
+        </button>
+    </div>
+
+    <div class="chat-interface">
+        <div class="chat-history" id="chat-history">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="input-container">
+            <button id="record-btn" class="senior-button voice-button">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <input type="text" id="user-input" 
+                   placeholder="Speak or type your message..." 
+                   class="senior-input"
+                   aria-label="Input message">
+            <button id="send-btn" class="senior-button send-button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
