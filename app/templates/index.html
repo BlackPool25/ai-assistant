@@ -1,77 +1,114 @@
+<!-- app/templates/index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Senior Assistant</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARA - Senior Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>AI Assistant</h1>
-        <div class="chat-box" id="chat-box"></div>
-        
-        <div class="controls">
-            <button id="record-btn" class="large-btn">🎤 Press to Speak</button>
-            <div class="or">OR</div>
-            <input type="text" id="text-input" placeholder="Type your message...">
-            <button id="send-btn" class="large-btn">Send</button>
+        <header class="app-header">
+            <h1><i class="fas fa-heartbeat"></i> CARA Assistant</h1>
+            <div class="controls">
+                <div class="device-selection">
+                    <select id="input-device" class="device-select">
+                        <option value="">Select Microphone</option>
+                    </select>
+                    <select id="output-device" class="device-select">
+                        <option value="">Select Speaker</option>
+                    </select>
+                </div>
+                <button id="mode-btn" class="toggle-btn">
+                    <i class="fas fa-volume-up"></i> Audio Mode
+                </button>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-history" id="chat-history"></div>
+            
+            <div class="input-group">
+                <button id="record-btn" class="voice-btn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <input type="text" id="text-input" placeholder="Type or speak your message..." 
+                       aria-label="Input message">
+                <button id="send-btn" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            
+            <div class="status-indicator" id="status"></div>
         </div>
     </div>
 
     <script>
-        const recordBtn = document.getElementById('record-btn');
-        let mediaRecorder;
-        let audioChunks = [];
+        let isAudioMode = true;
+        let selectedInputDevice = null;
+        let selectedOutputDevice = null;
 
-        recordBtn.addEventListener('mousedown', startRecording);
-        recordBtn.addEventListener('mouseup', stopRecording);
+        // Initialize audio devices
+        async function initDevices() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioInputs = devices.filter(d => d.kind === 'audioinput');
+            const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
 
+            const inputSelect = document.getElementById('input-device');
+            audioInputs.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Microphone ${inputSelect.length + 1}`;
+                inputSelect.appendChild(option);
+            });
+
+            const outputSelect = document.getElementById('output-device');
+            audioOutputs.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Speaker ${outputSelect.length + 1}`;
+                outputSelect.appendChild(option);
+            });
+
+            // Set default devices
+            selectedInputDevice = audioInputs[0]?.deviceId;
+            selectedOutputDevice = audioOutputs[0]?.deviceId;
+        }
+
+        // Audio recording with device selection
         async function startRecording() {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-            mediaRecorder.start();
+            try {
+                const constraints = {
+                    audio: { deviceId: selectedInputDevice ? { exact: selectedInputDevice } : undefined }
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                mediaRecorder = new MediaRecorder(stream);
+                // ... rest of recording code ...
+            } catch (error) {
+                showStatus('Microphone access denied', 'error');
+            }
         }
 
-        async function stopRecording() {
-            mediaRecorder.stop();
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks);
-                const formData = new FormData();
-                formData.append('audio', audioBlob, 'recording.wav');
-                
-                const response = await fetch('/transcribe', { method: 'POST', body: formData });
-                const data = await response.json();
-                handleUserInput(data.text);
-                
-                audioChunks = [];
-            };
+        // Play audio with selected output device
+        function playAudio(audioUrl) {
+            const audio = new Audio(audioUrl);
+            
+            if (selectedOutputDevice && audio.setSinkId) {
+                audio.setSinkId(selectedOutputDevice)
+                    .catch(() => showStatus('Speaker selection failed', 'error'));
+            }
+            
+            audio.play().catch(() => {
+                showStatus('Enable audio permissions', 'error');
+            });
         }
 
-        async function handleUserInput(text) {
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += `<div class="user-message">You: ${text}</div>`;
-            
-            const response = await fetch('http://localhost:5005/webhooks/rest/webhook', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sender: 'user', message: text })
-            });
-            
-            const botResponse = await response.json();
-            const botText = botResponse[0].text;
-            chatBox.innerHTML += `<div class="bot-message">Assistant: ${botText}</div>`;
-            
-            // Convert response to speech
-            const ttsResponse = await fetch('/synthesize', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: botText })
-            });
-            
-            const audioData = await ttsResponse.json();
-            const audio = new Audio(audioData.audioUrl);
-            audio.play();
-        }
+        // Initialize devices on load
+        initDevices();
+        // ... rest of previous JavaScript code ...
     </script>
 </body>
 </html>
